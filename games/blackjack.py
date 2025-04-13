@@ -37,10 +37,8 @@ def setup_blackjack(tree, bank):
                 await interaction.followup.send(f"You busted with {val}. You lose ${bet}.")
                 return
 
-            hand_str = f"Your hand: {player} (total: {val})
-Dealer shows: {dealer[0]}"
-            await interaction.followup.send(hand_str + "
-Type `hit` or `stand`.")
+            hand_str = f"Your hand: {player} (total: {val})Dealer shows: {dealer[0]}"
+            await interaction.followup.send(hand_str + "Type `hit` or `stand`.")
 
             def check(m):
                 return m.author == interaction.user and m.channel == interaction.channel and m.content.lower() in ['hit', 'stand']
