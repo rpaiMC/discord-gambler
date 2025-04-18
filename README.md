@@ -46,14 +46,12 @@ pip install -r requirements.txt
 python main.py
 ```
 
----
-
 
 
 ---
 
 ## Might Add Later
-- Slots
+- other stake games
 - Wallet and bank differentiation, and robbing mechanic
 - fancier embeds
 
@@ -61,6 +59,9 @@ python main.py
 
 ## credits
 
-shout out to stackoverflow and chatgpt, and my girlfriend for feature testing
+stackoverflow
+chatgpt
+my girlfriend
+xurel
 
 
