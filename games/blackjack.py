@@ -1,68 +1,97 @@
 
 import random
 import discord
+from discord import app_commands
+from discord.ui import View, Button
 
 def setup_blackjack(tree, bank):
     @tree.command(name="blackjack", description="Play a game of blackjack")
     async def blackjack(interaction: discord.Interaction, bet: int):
-        await interaction.response.defer()
-
         balance = bank.get_balance(interaction.user.id)
         if bet > balance or bet <= 0:
-            await interaction.followup.send(f"Insufficient funds. Your balance: ${balance}", ephemeral=True)
+            await interaction.response.send_message(
+                f"You can't bet ${bet}. Your balance is ${balance}.", ephemeral=True)
             return
 
         deck = [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11] * 4
         random.shuffle(deck)
 
-        def draw(hand): hand.append(deck.pop())
+        player_hand = [deck.pop(), deck.pop()]
+        dealer_hand = [deck.pop(), deck.pop()]
 
-        player = []
-        dealer = []
-        draw(player)
-        draw(player)
-        draw(dealer)
-
-        def value(hand):
+        def hand_value(hand):
             total = sum(hand)
             while total > 21 and 11 in hand:
                 hand[hand.index(11)] = 1
                 total = sum(hand)
             return total
 
-        while True:
-            val = value(player)
-            if val > 21:
-                bank.update_balance(interaction.user.id, -bet)
-                await interaction.followup.send(f"You busted with {val}. You lose ${bet}.")
-                return
+        class BlackjackView(View):
+            def __init__(self):
+                super().__init__(timeout=60)
+                self.player_hand = player_hand
+                self.dealer_hand = dealer_hand
+                self.deck = deck
+                self.result = None
 
-            hand_str = f"Your hand: {player} (total: {val})Dealer shows: {dealer[0]}"
-            await interaction.followup.send(hand_str + "Type `hit` or `stand`.")
+            async def interaction_check(self, i: discord.Interaction) -> bool:
+                return i.user.id == interaction.user.id
 
-            def check(m):
-                return m.author == interaction.user and m.channel == interaction.channel and m.content.lower() in ['hit', 'stand']
+            def get_embed(self):
+                return discord.Embed(
+                    title="🃏 Blackjack",
+                    description=(
+                        f"**Your hand:** {self.player_hand} (Total: {hand_value(self.player_hand)})\n"
+                        f"**Dealer shows:** {self.dealer_hand[0]}"
+                    ),
+                    color=discord.Color.green()
+                )
 
-            msg = await interaction.client.wait_for('message', check=check)
-            if msg.content.lower() == 'hit':
-                draw(player)
-            else:
-                break
+            @discord.ui.button(label="Hit", style=discord.ButtonStyle.primary)
+            async def hit(self, i: discord.Interaction, button: Button):
+                self.player_hand.append(self.deck.pop())
+                if hand_value(self.player_hand) > 21:
+                    bank.update_balance(interaction.user.id, -bet)
+                    embed = discord.Embed(
+                        title="💥 Busted!",
+                        description=f"You busted with {self.player_hand} (Total: {hand_value(self.player_hand)}).\nYou lose ${bet}.",
+                        color=discord.Color.red()
+                    )
+                    await i.response.edit_message(embed=embed, view=None)
+                    self.stop()
+                else:
+                    await i.response.edit_message(embed=self.get_embed(), view=self)
 
-        while value(dealer) < 17:
-            draw(dealer)
+            @discord.ui.button(label="Stand", style=discord.ButtonStyle.secondary)
+            async def stand(self, i: discord.Interaction, button: Button):
+                while hand_value(self.dealer_hand) < 17:
+                    self.dealer_hand.append(self.deck.pop())
 
-        p_val = value(player)
-        d_val = value(dealer)
-        result = f"Your hand: {player} ({p_val})\nDealer hand: {dealer} ({d_val})\n"
+                player_total = hand_value(self.player_hand)
+                dealer_total = hand_value(self.dealer_hand)
 
-        if d_val > 21 or p_val > d_val:
-            bank.update_balance(interaction.user.id, bet)
-            result += f"🎉 You win ${bet}!"
-        elif d_val > p_val:
-            bank.update_balance(interaction.user.id, -bet)
-            result += f"😞 You lose ${bet}."
-        else:
-            result += "It's a tie!"
+                if dealer_total > 21 or player_total > dealer_total:
+                    bank.update_balance(interaction.user.id, bet)
+                    outcome = f"🎉 You win ${bet}!"
+                    color = discord.Color.green()
+                elif dealer_total > player_total:
+                    bank.update_balance(interaction.user.id, -bet)
+                    outcome = f"😞 You lose ${bet}."
+                    color = discord.Color.red()
+                else:
+                    outcome = "It's a tie!"
+                    color = discord.Color.blurple()
 
-        await interaction.followup.send(result)
+                embed = discord.Embed(
+                    title="🃏 Final Hands",
+                    description=(
+                        f"**Your hand:** {self.player_hand} (Total: {player_total})\n"
+                        f"**Dealer hand:** {self.dealer_hand} (Total: {dealer_total})\n\n{outcome}"
+                    ),
+                    color=color
+                )
+                await i.response.edit_message(embed=embed, view=None)
+                self.stop()
+
+        view = BlackjackView()
+        await interaction.response.send_message(embed=view.get_embed(), view=view)

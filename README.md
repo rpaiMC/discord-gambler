@@ -1,16 +1,23 @@
 
 # Discord Gambling Bot
 
-This is a chill little Discord bot made with Python. It lets you gamble fake money with your friends using slash commands. Classic stuff like coin flips and blackjack, all wrapped up in a simple interface.
+simple discord casino, has the following features:
+- play blackjack
+- coinflip
+- check your balance
 
 ---
 
+
 ## What it does
 
-- Tracks user balances in a JSON file (yep, just a simple file — no database needed)
-- `/coinflip` lets you bet on heads or tails
-- `/blackjack` gives you a basic blackjack game against a virtual dealer
-- All commands are slash commands, so you can just type `/` and pick what you want
+- Tracks user balances in a JSON file
+- `/coinflip` to bet on heads or tails
+- `/blackjack` to play against the house
+- `/daily` to claim $10,000 once a day
+- `/bank` to check your balance
+- `/money` (admin-only) to give or remove money
+- `/slots` slot machine game with emoji reels and payouts
 
 ---
 
@@ -39,34 +46,37 @@ python main.py
 
 ---
 
+
 ## Folder Breakdown
 
 ```
 discord-gambler/
-├── main.py             # Starts the bot
-├── bank.py             # Keeps track of balances
+├── main.py                         # Starts the bot
+├── bank.py                         # Keeps track of balances
 ├── games/
-│   ├── coinflip.py     # Coin flip logic
-│   └── blackjack.py    # Blackjack logic
+│   ├── coinflip.py                 # Coin flip logic
+│   └── blackjack.py                # Blackjack logic
+├── commands/
+│   ├── economy.py                  # /daily and /bank
+│   └── economy_extensions.py       # /money and /slots
 ├── data/
-│   └── bank.json       # Stores user money
-├── requirements.txt    # Dependencies
-└── README.md           # You're reading it
+│   ├── bank.json                   # Stores user money
+│   └── cooldowns.json              # Tracks daily cooldowns
+├── requirements.txt                # Dependencies
+└── README.md                       # You're reading it
 ```
 
 ---
 
 ## Might Add Later
-
-- Command to check your balance
-- Leaderboard to see who’s rich
-- More games (slots? roulette?)
-- Better storage (like SQLite or MongoDB maybe for global leaderboards)
+- Slots
+- Wallet and bank differentiation, and robbing mechanic
+- fancier embeds
 
 ---
 
-## Final Thoughts
+## credits
 
-This is just a fun little side project. If you want to expand on it or tweak the rules, go for it.
+shout out to stackoverflow and chatgpt, and my girlfriend for feature testing
 
-Have fun, and maybe don’t bet your rent money... even if it’s fake.
+
