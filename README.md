@@ -4,6 +4,7 @@
 simple discord casino, has the following features:
 - play blackjack
 - coinflip
+- stake style mines
 - check your balance
 
 ---
@@ -14,9 +15,10 @@ simple discord casino, has the following features:
 - Tracks user balances in a JSON file
 - `/coinflip` to bet on heads or tails
 - `/blackjack` to play against the house
+- '/mines' to play a game of mines
 - `/daily` to claim $10,000 once a day
 - `/bank` to check your balance
-- `/money` (admin-only) to give or remove money
+- `/economy money` (admin-only) to give or remove money
 - `/slots` slot machine game with emoji reels and payouts
 
 ---
@@ -47,24 +49,6 @@ python main.py
 ---
 
 
-## Folder Breakdown
-
-```
-discord-gambler/
-├── main.py                         # Starts the bot
-├── bank.py                         # Keeps track of balances
-├── games/
-│   ├── coinflip.py                 # Coin flip logic
-│   └── blackjack.py                # Blackjack logic
-├── commands/
-│   ├── economy.py                  # /daily and /bank
-│   └── economy_extensions.py       # /money and /slots
-├── data/
-│   ├── bank.json                   # Stores user money
-│   └── cooldowns.json              # Tracks daily cooldowns
-├── requirements.txt                # Dependencies
-└── README.md                       # You're reading it
-```
 
 ---
 
